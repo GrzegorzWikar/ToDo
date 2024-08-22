@@ -2,14 +2,27 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 
-const DayView: React.FC<{ selectedDate: Date }> = ({ selectedDate }) => {
+interface DayViewProps{
+    selectedDate : Date,
+    monthsInYear : string[]
+}
+
+const DayView: React.FC<DayViewProps> = ({ selectedDate, monthsInYear } : DayViewProps) => {
 
     const daysInWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     
     return (
         <Container className="mt-4">
-            <h2 className='text-center'>{daysInWeek[selectedDate.getDay()]}</h2>
-            <h3 className="text-center">{selectedDate.toLocaleDateString()}</h3>
+            <Row>
+                <Col>
+                    <h2 className='text-center'>{daysInWeek[selectedDate.getDay()]}</h2>
+                    <h3 className="text-center">{selectedDate.getDate()}</h3>
+                </Col>
+                <Col>
+                    <h2 className='text-center'>{selectedDate.getFullYear()}</h2>
+                    <h3 className="text-center">{monthsInYear[selectedDate.getMonth()]}</h3>
+                </Col>
+            </Row>
             <div className="border">
                 <ScheduleGrid />
             </div>

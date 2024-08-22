@@ -1,8 +1,8 @@
-import {ListGroup, Badge } from 'react-bootstrap';
+import {ListGroup} from 'react-bootstrap';
 
 interface DayEventListProps {
   day : number | string,
-  events : string[]
+  events : string[],
 }
 
 function DayEventList( {day, events} : DayEventListProps ) {

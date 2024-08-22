@@ -2,12 +2,15 @@
 import React from 'react';
 import { Row, Col, Container } from 'react-bootstrap';
 
-const WeekView: React.FC<{ selectedDate: Date }> = ({ selectedDate }) => {
+interface WeekViewProps{
+    selectedDate: Date,
+    daysInWeek : string[],
+    monthsInYear : string[]
+}
+
+const WeekView: React.FC<WeekViewProps> = ({ selectedDate ,daysInWeek, monthsInYear }) => {
     const startOfWeek = new Date(selectedDate);
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Ustaw na poniedziałek
-
-    const daysInWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const monthsInYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
     const daysOfWeek: Date[] = [];
     for (let i = 0; i < 7; i++) {

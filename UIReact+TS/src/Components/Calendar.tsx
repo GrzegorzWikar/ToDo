@@ -1,15 +1,25 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Button, ButtonGroup, Badge } from 'react-bootstrap';
+import { Container, Button, ButtonGroup} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import WeekView from './WeekView';
 import DayView from './DayView';
-import DayEventList from './DayEventList';
+import MonthView from './MonthView';
 
 interface ToDoProps{
     date : Date,
     title : string,
     description : string
 }
+
+interface SwitchDisplayDataProps{
+    currentYear : number, 
+    currentMonth : number, 
+    day : number, 
+    weekIndex : number
+}
+
+const daysInWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const monthsInYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 const Calendar: React.FC = () => {
     const [view, setView] = useState<'month' | 'week' | 'day'>('month');
@@ -19,10 +29,14 @@ const Calendar: React.FC = () => {
         setView(newView);
     };
 
-    const handleDateChange = (date: Date) => {
-        setSelectedDate(date);
+    const handleDateChange = ({currentYear, currentMonth, day, weekIndex} : SwitchDisplayDataProps) => {
+        if (weekIndex === 0 && day > 7 && currentMonth === 1) setSelectedDate(new Date(currentYear - 1, 12 , day));
+        if (weekIndex === 0 && day > 7 && currentMonth >= 1) setSelectedDate(new Date(currentYear, currentMonth -1 , day));
+        if (weekIndex === 5 && day < 7 && currentMonth !== 12) setSelectedDate(new Date(currentYear, currentMonth + 1, day));
+        if (weekIndex === 5 && day < 7 && currentMonth === 12) setSelectedDate(new Date(currentYear +1 , 1, day));
+        console.log(selectedDate);
     };
-
+    console.log(selectedDate);
     return (
         <Container className="mt-4">
             <ButtonGroup className="mb-3">
@@ -31,85 +45,15 @@ const Calendar: React.FC = () => {
                 <Button variant="secondary" onClick={() => handleViewChange('day')}>Day</Button>
             </ButtonGroup>
             {view === 'month' && (
-                <MonthView selectedDate={selectedDate} onDateChange={handleDateChange} />
+                <MonthView selectedDate={selectedDate} onDateChange={handleDateChange} monthsInYear={monthsInYear} daysInWeek={daysInWeek}/>
             )}
             {view === 'week' && (
-                <WeekView selectedDate={selectedDate} />
+                <WeekView selectedDate={selectedDate} daysInWeek={daysInWeek} monthsInYear={monthsInYear}/>
             )}
             {view === 'day' && (
-                <DayView selectedDate={selectedDate} />
+                <DayView selectedDate={selectedDate} monthsInYear={monthsInYear}/>
             )}
         </Container>
-    );
-};
-
-const MonthView: React.FC<{ selectedDate: Date; onDateChange: (date: Date) => void }> = ({ selectedDate, onDateChange }) => {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth();
-
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-
-    const previousMonthLastDay = new Date(currentYear, currentMonth, 0);
-
-    const startDay = (firstDayOfMonth.getDay() + 6) % 7; // 0 (poniedziałek) do 6 (niedziela)
-    const daysInMonth: (number | string)[] = [];
-    const calendar: (number | string)[][] = [];
-
-    const totalDaysInMonth = lastDayOfMonth.getDate();
-    const totalDaysInPrevMonth = previousMonthLastDay.getDate();
-
-    // Dodajemy dni z poprzedniego miesiąca
-    for (let i = startDay; i > 0; i--) {
-        daysInMonth.push(totalDaysInPrevMonth - i + 1);
-    }
-
-    // Dodajemy dni obecnego miesiąca
-    for (let i = 1; i <= totalDaysInMonth; i++) {
-        daysInMonth.push(i);
-    }
-    
-    // Dodajemy dni z następnego miesiąca, tylko jeśli nie osiągnęliśmy jeszcze 35 dni
-    let dayCounter = 1;
-    while (daysInMonth.length < 35) { // 5 tygodni = 35 dni
-        daysInMonth.push(dayCounter++);
-    }
-
-    // Dzielenie dni na tygodnie
-    for (let i = 0; i < daysInMonth.length; i += 7) {
-        calendar.push(daysInMonth.slice(i, i + 7));
-    }
-
-    // Pełne nazwy dni tygodnia
-    const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
-    return (
-        <div>
-            <Row className="text-center">
-                {daysOfWeek.map(day => (
-                    <Col key={day} className="border font-weight-bold">
-                        {day}
-                    </Col>
-                ))}
-            </Row>
-            {calendar.map((week, weekIndex) => (
-                <Row key={weekIndex}>
-                    {week.map((day, dayIndex) => (
-                        <Col
-                            key={dayIndex}
-                            className={`border py-2 ${typeof day === 'string' ? 'text-muted' : ''}`}
-                            onClick={() => day !== 'string' && onDateChange(new Date(currentYear, currentMonth, day as number))}
-                        >
-                            <Badge bg="info" pill>
-                                {day}
-                            </Badge>
-                            <DayEventList day={day} events={daysOfWeek}/>
-                        </Col>
-                    ))}
-                </Row>
-            ))}
-        </div>
     );
 };
 
